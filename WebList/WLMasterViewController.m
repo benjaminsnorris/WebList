@@ -18,6 +18,7 @@
 }
 @property (strong, nonatomic) IBOutlet UISearchBar *searchBar;
 @property (nonatomic, strong) UISearchDisplayController *searchController;
+@property (nonatomic, strong) NSString *selectedURL;
 
 @end
 
@@ -69,6 +70,15 @@
 }
 
 #pragma mark - Table View
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (tableView == self.tableView) {
+        self.selectedURL = _objects[indexPath.row];
+    } else {
+        self.selectedURL = _filteredObjects[indexPath.row];
+    }
+    [self performSegueWithIdentifier:@"detailSegue" sender:self];
+}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -131,9 +141,8 @@
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if ([[segue identifier] isEqualToString:@"showDetail"]) {
-        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        [[segue destinationViewController] setDetailItem:_objects[indexPath.row]];
+    if ([[segue identifier] isEqualToString:@"detailSegue"]) {
+        [[segue destinationViewController] setDetailItem:self.selectedURL];
     }
 }
 
