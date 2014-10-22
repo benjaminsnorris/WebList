@@ -17,6 +17,8 @@
     NSArray *_filteredObjects;
 }
 @property (strong, nonatomic) IBOutlet UISearchBar *searchBar;
+@property (nonatomic, strong) UISearchDisplayController *searchController;
+
 @end
 
 @implementation WLMasterViewController
@@ -34,6 +36,10 @@
 
     _objects = [WebsiteController websites].mutableCopy;
     self.searchBar.delegate = self;
+    self.searchController = [[UISearchDisplayController alloc] initWithSearchBar:self.searchBar contentsController:self];
+    self.searchController.searchResultsDataSource = self;
+    self.searchController.searchResultsDelegate = self;
+    [self.searchController.searchResultsTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
 }
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
@@ -71,7 +77,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (_filteredObjects == nil) {
+    if ([tableView isEqual:self.tableView]) {
         return _objects.count;
     } else {
         return _filteredObjects.count;
@@ -82,7 +88,7 @@
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
 
-    if (_filteredObjects == nil) {
+    if ([tableView isEqual:self.tableView]) {
         cell.textLabel.text = _objects[indexPath.row];
     } else {
         cell.textLabel.text = _filteredObjects[indexPath.row];
