@@ -12,9 +12,11 @@
 
 #import "WebsiteController.h"
 
-@interface WLMasterViewController () {
+@interface WLMasterViewController () <UISearchBarDelegate> {
     NSMutableArray *_objects;
+    NSArray *_filteredObjects;
 }
+@property (strong, nonatomic) IBOutlet UISearchBar *searchBar;
 @end
 
 @implementation WLMasterViewController
@@ -31,7 +33,17 @@
     // self.navigationItem.leftBarButtonItem = self.editButtonItem;
 
     _objects = [WebsiteController websites].mutableCopy;
-    
+    self.searchBar.delegate = self;
+}
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    if (searchText.length == 0) {
+        _filteredObjects = nil;
+    } else {
+        NSPredicate * pred = [NSPredicate predicateWithFormat:@"self CONTAINS[cd] %@", searchText];
+        _filteredObjects = [_objects filteredArrayUsingPredicate:pred];
+    }
+    [self.tableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning
@@ -59,14 +71,22 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return _objects.count;
+    if (_filteredObjects == nil) {
+        return _objects.count;
+    } else {
+        return _filteredObjects.count;
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
 
-    cell.textLabel.text = _objects[indexPath.row];
+    if (_filteredObjects == nil) {
+        cell.textLabel.text = _objects[indexPath.row];
+    } else {
+        cell.textLabel.text = _filteredObjects[indexPath.row];
+    }
 
     return cell;
 }
